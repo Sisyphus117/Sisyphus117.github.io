@@ -1,7 +1,7 @@
 /* 1. 背景图设置：模糊与变暗 */
 #web_bg {
   /* 模糊 10px，亮度 0.6 (变暗以突出内容) */
-  filter: blur(4px) brightness(0.6);
+  filter: blur(10px) brightness(0.6);
 }
 
 /* 2. 确保 body 背景透明，以便显示底部的 #web_bg */
@@ -18,8 +18,22 @@ body {
 .layout_post > #post,
 .read-mode .layout_post > #post {
   /* 增加透明度 (Alpha 设为 0.15，越小越透明) */
-  background: rgba(255, 255, 255, 0.47) !important;
+  background: rgba(255, 255, 255, 0.15) !important;
   /* 可选：给内容框也加一点毛玻璃效果，提升阅读体验 */
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
+}
+/* 5. Aplayer 样式调整 */
+/* 浮动在右侧 (覆盖默认的 left: 0) */
+.aplayer-fixed {
+  left: auto !important;
+  right: 20px !important; /* 距离右边 20px */
+}
+
+/* 6. 首页隐藏 Aplayer */
+/* 需要配合 JS 给 body 添加 .home 类 */
+body.home .aplayer,
+body.home .aplayer-fixed,
+body.home meting-js {
+  display: none !important;
 }
