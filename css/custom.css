@@ -1,0 +1,25 @@
+/* 1. 背景图设置：模糊与变暗 */
+#web_bg {
+  /* 模糊 10px，亮度 0.6 (变暗以突出内容) */
+  filter: blur(4px) brightness(0.6);
+}
+
+/* 2. 确保 body 背景透明，以便显示底部的 #web_bg */
+body {
+  background: transparent !important;
+}
+
+/* 3. 调整内容框透明度 */
+/* 修复了之前的 #aside_content 为正确的 #aside-content */
+#aside-content .card-widget,
+#recent-posts > .recent-post-item,
+.layout_page > div:first-child:not(.recent-posts),
+.layout_post > #page,
+.layout_post > #post,
+.read-mode .layout_post > #post {
+  /* 增加透明度 (Alpha 设为 0.15，越小越透明) */
+  background: rgba(255, 255, 255, 0.47) !important;
+  /* 可选：给内容框也加一点毛玻璃效果，提升阅读体验 */
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
