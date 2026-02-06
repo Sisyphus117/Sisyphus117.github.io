@@ -23,17 +23,23 @@ body {
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
 }
-/* 5. Aplayer 样式调整 */
-/* 浮动在右侧 (覆盖默认的 left: 0) */
+/* 5. Aplayer 样式调整 (回归原生 fixed 模式) */
+/* MetingJS 自动生成的 .aplayer-fixed 容器 */
 .aplayer-fixed {
-  left: auto !important;
-  right: 20px !important; /* 距离右边 20px */
+  z-index: 999999 !important; /* 确保层级最高 */
+  display: block !important;  /* 强制显示 */
+  bottom: 0 !important;       /* 确保在底部 */
+  left: 0 !important;         /* 确保在左侧（或改为 right: 0） */
 }
 
-/* 6. 首页隐藏 Aplayer */
-/* 需要配合 JS 给 body 添加 .home 类 */
-body.home .aplayer,
-body.home .aplayer-fixed,
-body.home meting-js {
-  display: none !important;
+/* 如果是 mini 模式，可能需要额外调整 */
+.aplayer.aplayer-fixed.aplayer-narrow .aplayer-body {
+  left: -66px !important; /* 默认隐藏时的位置 */
 }
+
+.aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover {
+  left: 0 !important; /* 悬停显示 */
+}
+
+/* 6. 首页隐藏 Aplayer (由 JS 直接控制容器 display，不再依赖 body class) */
+/* body.home .aplayer ... 已废弃 */
