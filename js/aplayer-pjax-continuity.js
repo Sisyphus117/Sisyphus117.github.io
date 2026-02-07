@@ -1,4 +1,24 @@
 (() => {
+  window.__aplayerPjaxContinuity = true
+
+  const ensureFixedPlayerDetached = () => {
+    const current = document.getElementById('aplayer-fixed')
+    const saved = window.__aplayerFixedEl
+
+    if (saved && current && saved !== current) {
+      current.remove()
+    }
+
+    const fixedEl = saved || current
+    if (!fixedEl) return
+
+    window.__aplayerFixedEl = fixedEl
+
+    if (fixedEl.parentNode !== document.body) {
+      document.body.appendChild(fixedEl)
+    }
+  }
+
   const patchRunMetingOnPjax = () => {
     const globalFn = window.globalFn
     if (!globalFn || !globalFn.pjaxComplete) return
@@ -7,22 +27,70 @@
     const original = pjaxCompleteFns.runMetingJS
     if (typeof original !== 'function') return
 
-    if (original.__aplayerPjaxContinuityPatched) return
+    if (pjaxCompleteFns.runMetingJS.__aplayerPjaxContinuityPatched) return
 
     const wrapped = () => {
-      const players = Array.from(document.getElementsByClassName('aplayer'))
-      const hasNonFixedPlayer = players.some(el => el?.dataset?.fixed !== 'true')
-      if (!hasNonFixedPlayer) return
-      original()
+      const hasOtherPlayer = !!document.querySelector('.aplayer:not(#aplayer-fixed)')
+      if (!hasOtherPlayer) return
+
+      const fixedEl = window.__aplayerFixedEl || document.getElementById('aplayer-fixed')
+      let placeholder = null
+      if (fixedEl && fixedEl.parentNode) {
+        placeholder = document.createComment('aplayer-fixed-placeholder')
+        fixedEl.parentNode.insertBefore(placeholder, fixedEl)
+        fixedEl.remove()
+      }
+
+      const oldAplayers = Array.isArray(window.aplayers) ? window.aplayers : null
+      if (oldAplayers) {
+        window.aplayers = oldAplayers.filter(ap => !(ap?.options?.fixed || ap?.container?.id === 'aplayer-fixed'))
+      }
+
+      try {
+        original()
+      } finally {
+        if (fixedEl) {
+          if (placeholder && placeholder.parentNode) {
+            placeholder.parentNode.insertBefore(fixedEl, placeholder)
+            placeholder.remove()
+          }
+          window.__aplayerFixedEl = fixedEl
+          if (fixedEl.parentNode !== document.body) {
+            document.body.appendChild(fixedEl)
+          }
+        }
+
+        if (oldAplayers) {
+          const fixedInstances = oldAplayers.filter(ap => ap?.options?.fixed || ap?.container?.id === 'aplayer-fixed')
+          if (fixedInstances.length) {
+            const now = Array.isArray(window.aplayers) ? window.aplayers : []
+            window.aplayers = fixedInstances.concat(now)
+          }
+        }
+      }
     }
 
     wrapped.__aplayerPjaxContinuityPatched = true
     pjaxCompleteFns.runMetingJS = wrapped
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  const schedulePatch = () => {
     patchRunMetingOnPjax()
-    document.addEventListener('pjax:complete', patchRunMetingOnPjax)
+    let tries = 0
+    const timer = setInterval(() => {
+      tries += 1
+      patchRunMetingOnPjax()
+      if (window.globalFn?.pjaxComplete?.runMetingJS?.__aplayerPjaxContinuityPatched || tries >= 50) {
+        clearInterval(timer)
+      }
+    }, 200)
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    ensureFixedPlayerDetached()
+    schedulePatch()
+    document.addEventListener('pjax:send', ensureFixedPlayerDetached)
+    document.addEventListener('pjax:complete', schedulePatch)
+    document.addEventListener('pjax:complete', ensureFixedPlayerDetached)
   })
 })()
-
