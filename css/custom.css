@@ -43,3 +43,15 @@ body {
 
 /* 6. 首页隐藏 Aplayer (由 JS 直接控制容器 display，不再依赖 body class) */
 /* body.home .aplayer ... 已废弃 */
+
+.avatar-img {
+  animation: none !important;
+}
+
+.avatar-img img {
+  transform: none !important;
+}
+
+.avatar-img img:hover {
+  transform: none !important;
+}
